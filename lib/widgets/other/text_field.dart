@@ -1,4 +1,4 @@
-// Copyright 2020 Pegasystems Inc. All rights reserved.
+// Copyright 2022 Pegasystems Inc. All rights reserved.
 // Use of this source code is governed by a Apache 2.0 license that can be
 // found in the LICENSE file.
 
@@ -18,8 +18,8 @@ class WrappedTextField extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: Theme.of(context).textTheme.body1.copyWith(color: Color(0xFF626475))),
-          Text(textValue, style: Theme.of(context).textTheme.subhead)
+          Text(label, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: const Color(0xFF626475))),
+          Text(textValue, style: Theme.of(context).textTheme.subtitle1)
         ]
       )
     );

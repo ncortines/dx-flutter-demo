@@ -1,4 +1,4 @@
-// Copyright 2020 Pegasystems Inc. All rights reserved.
+// Copyright 2022 Pegasystems Inc. All rights reserved.
 // Use of this source code is governed by a Apache 2.0 license that can be
 // found in the LICENSE file.
 
@@ -25,12 +25,12 @@ UnmodifiableMapView<String, dynamic> _replaceCurrentPage(
     UnmodifiableMapView<String, dynamic> page) {
   final mutableState = Map<String, dynamic>.from(state);
   if (page['root'] == null) {
-    page = Map<String, dynamic>.unmodifiable({'root': page});
+    page = UnmodifiableMapView({'root': page});
   }
   mutableState['fetchingData'] = false;
   mutableState['currentFormData'] = null;
   mutableState[DxContext.currentPage.toString()] = page;
-  return Map<String, dynamic>.unmodifiable(mutableState);
+  return UnmodifiableMapView(mutableState);
 }
 
 // redux store reducers
@@ -105,7 +105,7 @@ final _reducer = combineReducers<UnmodifiableMapView<String, dynamic>>([
         .split('.')
         .reversed
         .fold({propertyKey: action.value}, (Map data, String pathKey) {
-          if (pathKey != null && pathKey.isNotEmpty) {
+          if (pathKey.isNotEmpty) {
             return {pathKey: data};
           }
           return data;
@@ -118,49 +118,43 @@ final _reducer = combineReducers<UnmodifiableMapView<String, dynamic>>([
 
 // redux epi definitions
 
-class _FetchPortalEpic implements EpicClass<Map> {
-  @override
-  Stream<dynamic> call(Stream<dynamic> actions, EpicStore<Map> store) =>
-      Observable(actions)
-          .whereType<FetchPortal>()
-          .asyncMap((action) => getPortal(action.portalName))
-          .map((data) => SetCurrentPortal(data));
+Stream<dynamic> _fetchPortalEpic(Stream<dynamic> actions, EpicStore<Map> store) {
+  return actions
+      .whereType<FetchPortal>()
+      .asyncMap((action) => getPortal(action.portalName))
+      .map((data) => SetCurrentPortal(data));
 }
 
-class _FetchPageEpic implements EpicClass<Map> {
-  @override
-  Stream<dynamic> call(Stream<dynamic> actions, EpicStore<Map> store) =>
-      Observable(actions)
-          .whereType<FetchPage>()
-          .asyncMap((action) => getPage(action.pyRuleName, action.pyClassName))
-          .map((data) => SetCurrentPage(data));
+Stream<dynamic> _fetchPageEpic(Stream<dynamic> actions, EpicStore<Map> store) {
+  return actions
+      .whereType<FetchPage>()
+      .asyncMap((action) => getPage(action.pyRuleName, action.pyClassName))
+      .map((data) => SetCurrentPage(data));
 }
 
-class _OpenAssignmentEpic implements EpicClass<Map> {
-  @override
-  Stream<dynamic> call(Stream<dynamic> actions, EpicStore<Map> store) =>
-      Observable(actions)
-          .whereType<OpenAssignment>()
-          .asyncMap((action) => openAssignment(action.pzInsKey))
-          .map((data) => SetCurrentPage(data));
+Stream<dynamic> _openAssignmentEpic(Stream<dynamic> actions, EpicStore<Map> store) {
+  return actions
+      .whereType<OpenAssignment>()
+      .asyncMap((action) => openAssignment(action.pzInsKey))
+      .map((data) => SetCurrentPage(data));
 }
 
-class _CreateAssignmentEpic implements EpicClass<Map> {
-  @override
-  Stream<dynamic> call(Stream<dynamic> actions, EpicStore<Map> store) =>
-      Observable(actions)
-          .whereType<CreateAssignment>()
-          .asyncMap((action) => createAssignment(action.pyClassName, action.pyFlowType))
-          .map((data) => SetCurrentPage(data));
+Stream<dynamic> _createAssignmentEpic(Stream<dynamic> actions, EpicStore<Map> store) {
+  return actions
+      .whereType<CreateAssignment>()
+      .asyncMap((action) => createAssignment(action.pyClassName, action.pyFlowType))
+      .map((data) => SetCurrentPage(data));
 }
 
-class _ProcessAssignment implements EpicClass<Map> {
-  @override
-  Stream<dynamic> call(Stream<dynamic> actions, EpicStore<Map> store) =>
-      Observable(actions).whereType<ProcessAssignment>().asyncMap((action) {
-        final payload = getCurrentFormData();
+Stream<dynamic> _processAssignment(Stream<dynamic> actions, EpicStore<Map> store) {
+  return actions
+      .whereType<ProcessAssignment>().asyncMap((action) {
+        final Map? payload = getCurrentFormData();
         return processAssignment(
-            action.actionData.caseId, action.actionData.id, payload);
+          action.actionData.caseId!,
+          action.actionData.id!,
+          payload!
+        );
       }).map((data) {
         if (data.containsKey('errorDetails')) {
           return AddError(data);
@@ -236,7 +230,7 @@ enum DxContextButtonAction { submit, cancel, next, search, filter }
 // this flow of events is not part of redux but for simplicity and convenience it's
 // declared here
 StreamController<DxContextButtonAction> contextButtonActions =
-    new StreamController.broadcast();
+    StreamController.broadcast();
 
 class ToggleCustomButtonsVisibility {
   final Map<DxContextButtonAction, bool> buttonToggles;
@@ -268,7 +262,7 @@ class RemoveError {
   const RemoveError();
 }
 
-final initialContextButtonsVisibility = Map<String, dynamic>.unmodifiable({
+final initialContextButtonsVisibility = UnmodifiableMapView({
   DxContextButtonAction.submit.toString(): false,
   DxContextButtonAction.cancel.toString(): false,
   DxContextButtonAction.next.toString(): false,
@@ -278,16 +272,16 @@ final initialContextButtonsVisibility = Map<String, dynamic>.unmodifiable({
 
 // redux store initialization
 final dxStore = Store<UnmodifiableMapView<String, dynamic>>(_reducer,
-    initialState: Map<String, dynamic>.unmodifiable({
+    initialState: UnmodifiableMapView({
       'fetchingData': false,
       'contextButtonsVisibility': initialContextButtonsVisibility,
       'lastError': null,
       'currentFormData': null,
     }),
     middleware: [
-      EpicMiddleware<Map>(_FetchPortalEpic()),
-      EpicMiddleware<Map>(_FetchPageEpic()),
-      EpicMiddleware<Map>(_OpenAssignmentEpic()),
-      EpicMiddleware<Map>(_CreateAssignmentEpic()),
-      EpicMiddleware<Map>(_ProcessAssignment()),
+      EpicMiddleware(_fetchPortalEpic),
+      EpicMiddleware(_fetchPageEpic),
+      EpicMiddleware(_openAssignmentEpic),
+      EpicMiddleware(_createAssignmentEpic),
+      EpicMiddleware(_processAssignment),
     ]);

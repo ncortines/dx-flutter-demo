@@ -1,4 +1,4 @@
-// Copyright 2020 Pegasystems Inc. All rights reserved.
+// Copyright 2022 Pegasystems Inc. All rights reserved.
 // Use of this source code is governed by a Apache 2.0 license that can be
 // found in the LICENSE file.
 
@@ -17,28 +17,28 @@ class CaseView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget header = Container(
-      color: Color(0xFF295ED9),
-      padding: EdgeInsets.fromLTRB(10, 15, 10, 15),
+      color: const Color(0xFF295ED9),
+      padding: const EdgeInsets.fromLTRB(10, 15, 10, 15),
       child: Row(
         children: [
           Container(
             alignment: Alignment.center,
-            decoration: ShapeDecoration(
+            decoration: const ShapeDecoration(
               color: Color(0xFF113DA6),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(5))
               )
             ),
-            padding: EdgeInsets.all(10),
+            padding: const EdgeInsets.all(10),
             child: Icon(getIconData(iconName), color: Colors.white,),
           ),
           Container(
-            padding: EdgeInsets.only(left: 10),
+            padding: const EdgeInsets.only(left: 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(id, style: Theme.of(context).accentTextTheme.subtitle),
-                Text(label, style: Theme.of(context).accentTextTheme.title),
+                Text(id, style: Theme.of(context).accentTextTheme.subtitle1),
+                Text(label, style: Theme.of(context).accentTextTheme.titleMedium),
               ],
             )
           )

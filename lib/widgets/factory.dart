@@ -1,10 +1,9 @@
-// Copyright 2020 Pegasystems Inc. All rights reserved.
+// Copyright 2022 Pegasystems Inc. All rights reserved.
 // Use of this source code is governed by a Apache 2.0 license that can be
 // found in the LICENSE file.
 
 import 'dart:collection';
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:dx_flutter_demo/utils/dx_interpreter.dart';
 import 'package:dx_flutter_demo/utils/dx_store.dart';
@@ -19,32 +18,31 @@ import 'package:dx_flutter_demo/utils/pega_icons.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 
 import 'containers/assignment_form.dart';
-import 'containers/page.dart';
+import 'containers/pega_page.dart';
 import 'containers/app_shell.dart';
 import 'containers/region.dart';
 import 'other/error_box.dart';
 
-List<Widget> getWidgets(List<Map<String, dynamic>> nodes, BuildContext context,
+List<Widget> getWidgets(List<UnmodifiableMapView<String, dynamic>> nodes, BuildContext context,
     String pathContext, DxContext dxContext) {
-  if (nodes != null) {
+  if (nodes.isNotEmpty) {
     return nodes
-        .map((Map node) => getWidget(node, context, getUpdatedPathContext(pathContext, node),
-                dxContext: dxContext))
-        .where((widget) => widget != null)
+        .map((UnmodifiableMapView<String, dynamic> node) =>
+            getWidget(node, context, getUpdatedPathContext(pathContext, node), dxContext: dxContext)!)
         .toList();
   }
-  return null;
+  return List.empty();
 }
 
 List<Widget> getChildWidgets(UnmodifiableMapView<String, dynamic> node,
     BuildContext context, String pathContext, DxContext dxContext) {
-  final List<Map<String, dynamic>> children = getChildNodes(node);
+  final List<UnmodifiableMapView<String, dynamic>> children = getChildNodes(node);
   return getWidgets(children, context, pathContext, dxContext);
 }
 
 // in some cases the given node won't have a representation in the application's layout
 // this method will skip one node to continue rendering its children
-Widget skipNode(UnmodifiableMapView<String, dynamic> node, BuildContext context,
+Widget? skipNode(UnmodifiableMapView<String, dynamic> node, BuildContext context,
     String pathContext, DxContext dxContext) {
   final List<UnmodifiableMapView<String, dynamic>> children =
       getChildNodes(node);
@@ -59,11 +57,11 @@ Widget skipNode(UnmodifiableMapView<String, dynamic> node, BuildContext context,
 }
 
 /// method responsible for spitting out flutter widgets based on the current ui metadata node and context data
-Widget getWidget(UnmodifiableMapView<String, dynamic> node,
+Widget? getWidget(UnmodifiableMapView<String, dynamic>? node,
     BuildContext context, String pathContext,
     {DxContext dxContext = DxContext.currentPage}) {
   // check if node has a reference to another arbitrary leaf in the ui metadata tree
-  if (hasReference(node)) {
+  if (node != null && hasReference(node)) {
     node = getReferencedNode(node, dxContext, pathContext);
   }
 
@@ -72,24 +70,24 @@ Widget getWidget(UnmodifiableMapView<String, dynamic> node,
   switch (nodeType.toLowerCase()) {
     case 'table':
       final List items = getListFromDataSource(
-          getDataPropertyRecursive(node, ['config', 'referenceList']),
+          getDataPropertyRecursive(node!, ['config', 'referenceList']),
           dxContext);
       return AssignmentsList(items, 'pzInsKey', 'pyLabel', 'pxRefObjectInsName',
           'pxUrgencyAssign', 'pyAssignmentStatus');
     case 'todo':
       final List assignments = getListFromDataSource(
-          getDataPropertyRecursive(node, ['config', 'assignmentsList']),
+          getDataPropertyRecursive(node!, ['config', 'assignmentsList']),
           dxContext);
       return AssignmentsList(assignments.take(3).toList(), 'pzInsKey',
           'pyLabel', 'pxRefObjectKey', 'pxUrgencyAssign', 'pyAssignmentStatus');
     case 'region':
-      final String name = node['name'];
+      final String name = node!['name'];
       return Region(
           name, getChildWidgets(node, context, pathContext, dxContext));
     case 'page':
-      String title = getDataPropertyRecursive(node, ['config', 'title']);
+      String? title = getDataPropertyRecursive(node!, ['config', 'title']);
       if (title != null && title.isNotEmpty) {
-        final String operator = resolvePropertyValue(
+        final String? operator = resolvePropertyValue(
             getDataPropertyRecursive(node, ['config', 'operator']),
             dxContext,
             pathContext);
@@ -97,26 +95,26 @@ Widget getWidget(UnmodifiableMapView<String, dynamic> node,
           title += ', $operator';
         }
       }
-      return Page(
+      return PegaPage(
           title, getChildWidgets(node, context, pathContext, dxContext));
     case 'appshell':
       final String appName = resolvePropertyValue(
-          getDataPropertyRecursive(node, ['config', 'appName']),
+          getDataPropertyRecursive(node!, ['config', 'appName']),
           dxContext,
           pathContext);
       final List pages = getListFromDataSource(
           getDataPropertyRecursive(node, ['config', 'pages']), dxContext);
       final List caseTypes = getListFromDataSource(
           getDataPropertyRecursive(node, ['config', 'caseTypes']), dxContext);
-      final List<Map<String, dynamic>> children = getChildNodes(node);
-      final Map<String, dynamic> currentPage = children.first;
+      final List<UnmodifiableMapView<String, dynamic>> children = getChildNodes(node);
+      final UnmodifiableMapView<String, dynamic> currentPage = children.first;
       // dx store's current page is set only if not yet initialized
       // subsequent "InitCurrentPage" actions (eg. during hot-reloading) won't take effect
       dxStore.dispatch(InitCurrentPage(currentPage));
       return AppShell(appName, pages, caseTypes);
     case 'caseview':
       final String label = resolvePropertyValue(
-          getDataPropertyRecursive(node, ['config', 'heading']),
+          getDataPropertyRecursive(node!, ['config', 'heading']),
           dxContext,
           pathContext);
       final String id = resolvePropertyValue(
@@ -129,7 +127,7 @@ Widget getWidget(UnmodifiableMapView<String, dynamic> node,
           getChildWidgets(node, context, pathContext, dxContext));
     case 'casesummary':
       final List primaryFields = resolvePropertyValues(
-          getDataPropertyRecursive(node, ['config', 'primaryFields']),
+          getDataPropertyRecursive(node!, ['config', 'primaryFields']),
           'value',
           dxContext,
           pathContext);
@@ -150,19 +148,19 @@ Widget getWidget(UnmodifiableMapView<String, dynamic> node,
           distinct: true,
           builder: (context, value) {
             final List stages = resolvePropertyValue(
-                getDataPropertyRecursive(node, ['config', 'stages']),
+                getDataPropertyRecursive(node!, ['config', 'stages']),
                 dxContext,
                 pathContext);
             return CaseStageIndicator(stages);
           });
     case 'textinput':
       return StoreConnector<UnmodifiableMapView<String, dynamic>,
-              UnmodifiableMapView<String, dynamic>>(
+              UnmodifiableMapView<String, dynamic>?>(
           converter: (store) => getCurrentFormData(),
           distinct: true,
           builder: (context, value) {
             final String label = resolvePropertyValue(
-                getDataPropertyRecursive(node, ['config', 'label']),
+                getDataPropertyRecursive(node!, ['config', 'label']),
                 dxContext,
                 pathContext);
             final String propertyValueRef =
@@ -181,12 +179,12 @@ Widget getWidget(UnmodifiableMapView<String, dynamic> node,
     case 'pxdropdown':
     case 'dropdown':
       return StoreConnector<UnmodifiableMapView<String, dynamic>,
-              UnmodifiableMapView<String, dynamic>>(
+              UnmodifiableMapView<String, dynamic>?>(
           converter: (store) => getCurrentFormData(),
           distinct: true,
           builder: (context, value) {
             final List options = resolvePropertyValue(
-                getDataPropertyRecursive(node, ['config', 'datasource']),
+                getDataPropertyRecursive(node!, ['config', 'datasource']),
                 dxContext,
                 pathContext);
             final String label = resolvePropertyValue(
@@ -210,12 +208,12 @@ Widget getWidget(UnmodifiableMapView<String, dynamic> node,
     case 'pxinteger':
     case 'integer':
       return StoreConnector<UnmodifiableMapView<String, dynamic>,
-              UnmodifiableMapView<String, dynamic>>(
+              UnmodifiableMapView<String, dynamic>?>(
           converter: (store) => getCurrentFormData(),
           distinct: true,
           builder: (context, value) {
             final String label = resolvePropertyValue(
-                getDataPropertyRecursive(node, ['config', 'label']),
+                getDataPropertyRecursive(node!, ['config', 'label']),
                 dxContext,
                 pathContext);
             final String propertyValueRef =
@@ -233,15 +231,15 @@ Widget getWidget(UnmodifiableMapView<String, dynamic> node,
           });
     case 'viewcontainer':
     case 'flowcontainer':
-      return skipNode(node, context, pathContext, dxContext);
+      return skipNode(node!, context, pathContext, dxContext);
     case 'view':
-      if (getDataPropertyRecursive(node, ['config', 'ruleClass']) != null) {
+      if (getDataPropertyRecursive(node!, ['config', 'ruleClass']) != null) {
         // TODO this finished assignment detection logic based on "showList"
         final String showList = getDataPropertyRecursive(
             getCurrentPage(), ['data', 'content', 'showList']);
         if (showList == 'false') {
           final String actionId = node['name'];
-          final ActionData actionData = resolveActionData(actionId, dxContext);
+          final ActionData? actionData = resolveActionData(actionId, dxContext);
           if (actionData != null) {
             return AssignmentForm(actionData,
                 getChildWidgets(node, context, pathContext, dxContext));
@@ -249,13 +247,13 @@ Widget getWidget(UnmodifiableMapView<String, dynamic> node,
           return skipNode(node, context, pathContext, dxContext);
         }
         return Container(
-          padding: EdgeInsets.fromLTRB(0, 40, 0, 40),
+          padding: const EdgeInsets.fromLTRB(0, 40, 0, 40),
           child: Column(
             children: [
               Text('We are done here!',
-                  style: Theme.of(context).textTheme.headline),
+                  style: Theme.of(context).textTheme.headline1),
               Container(
-                  padding: EdgeInsets.only(top: 15),
+                  padding: const EdgeInsets.only(top: 15),
                   child: Icon(getIconData('pi-check')))
             ],
           ),

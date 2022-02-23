@@ -1,4 +1,4 @@
-// Copyright 2020 Pegasystems Inc. All rights reserved.
+// Copyright 2022 Pegasystems Inc. All rights reserved.
 // Use of this source code is governed by a Apache 2.0 license that can be
 // found in the LICENSE file.
 
@@ -6,7 +6,6 @@ library assignment_form;
 
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:dx_flutter_demo/utils/dx_interpreter.dart';
 import 'package:dx_flutter_demo/utils/dx_store.dart';
@@ -25,8 +24,8 @@ class AssignmentForm extends StatefulWidget {
 
 class AssignmentFormState extends State<AssignmentForm> {
   final _formKey = GlobalKey<FormState>();
-  StreamSubscription buttonsSubscription;
-  StreamSubscription dxStoreSubscription;
+  late StreamSubscription buttonsSubscription;
+  late StreamSubscription dxStoreSubscription;
 
   @override
   void initState() {
@@ -35,14 +34,14 @@ class AssignmentFormState extends State<AssignmentForm> {
     buttonsSubscription =
         contextButtonActions.stream.listen((DxContextButtonAction action) {
       if (action == DxContextButtonAction.submit) {
-        if (_formKey.currentState.validate()) {
+        if (_formKey.currentState!.validate()) {
           dxStore.dispatch(ProcessAssignment(widget.actionData));
         }
       }
     });
 
     dxStoreSubscription = dxStore.onChange.listen((dxState) {
-      final Map errorData = dxState['lastError'];
+      final Map? errorData = dxState['lastError'];
       if (errorData != null) {
         final String title = errorData['errorClassification'];
         final String content = errorData.containsKey('errorDetails') &&
@@ -62,10 +61,10 @@ class AssignmentFormState extends State<AssignmentForm> {
                 content: Text(content),
                 actions: [
                   FlatButton(
-                    child: Text('OK'),
+                    child: const Text('OK'),
                     onPressed: () {
-                      dxStore.dispatch(RemoveError());
-                      dxStore.dispatch(ToggleCustomButtonsVisibility(
+                      dxStore.dispatch(const RemoveError());
+                      dxStore.dispatch(const ToggleCustomButtonsVisibility(
                           {DxContextButtonAction.submit: true}));
                       Navigator.of(context).pop();
                     },
@@ -89,16 +88,16 @@ class AssignmentFormState extends State<AssignmentForm> {
   @override
   Widget build(BuildContext context) {
     dxStore.dispatch(
-        ToggleCustomButtonsVisibility({DxContextButtonAction.submit: true}));
+        const ToggleCustomButtonsVisibility({DxContextButtonAction.submit: true}));
     return Column(children: [
       Container(
-        padding: EdgeInsets.fromLTRB(5, 12, 5, 10),
-        child: Text(widget.actionData.name,
-            style: Theme.of(context).textTheme.title),
+        padding: const EdgeInsets.fromLTRB(5, 12, 5, 10),
+        child: Text(widget.actionData.name!,
+            style: Theme.of(context).textTheme.titleMedium),
       ),
-      Divider(),
+      const Divider(),
       Container(
-        padding: EdgeInsets.fromLTRB(7, 1, 7, 10),
+        padding: const EdgeInsets.fromLTRB(7, 1, 7, 10),
         child: Form(
             key: _formKey,
             child: Column(

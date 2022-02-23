@@ -1,4 +1,4 @@
-// Copyright 2020 Pegasystems Inc. All rights reserved.
+// Copyright 2022 Pegasystems Inc. All rights reserved.
 // Use of this source code is governed by a Apache 2.0 license that can be
 // found in the LICENSE file.
 
@@ -12,12 +12,12 @@ bool _showingOverlay = false;
 
 void attachListener() {
   dxStore.onChange.listen((dxState) {
-    bool fetchingPage = dxState['fetchingData'];
+    final bool fetchingPage = dxState['fetchingData'];
     if (_showingOverlay != fetchingPage) {
       if (fetchingPage == true) {
-        key.currentState.push(LoadingOverlay());
+        key.currentState?.push(LoadingOverlay());
       } else {
-        key.currentState.pop();
+        key.currentState?.pop();
       }
       _showingOverlay = fetchingPage;
     }

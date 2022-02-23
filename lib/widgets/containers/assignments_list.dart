@@ -1,4 +1,4 @@
-// Copyright 2020 Pegasystems Inc. All rights reserved.
+// Copyright 2022 Pegasystems Inc. All rights reserved.
 // Use of this source code is governed by a Apache 2.0 license that can be
 // found in the LICENSE file.
 
@@ -25,7 +25,7 @@ class AssignmentsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    dxStore.dispatch(ToggleCustomButtonsVisibility({
+    dxStore.dispatch(const ToggleCustomButtonsVisibility({
       DxContextButtonAction.filter: true,
       DxContextButtonAction.search: true
     }));
@@ -48,15 +48,15 @@ class AssignmentsList extends StatelessWidget {
                       child: Align(
                           alignment: Alignment.centerLeft,
                           child: Container(
-                              padding: EdgeInsets.only(left: 10),
-                              child: Icon(Icons.delete))),
+                              padding: const EdgeInsets.only(left: 10),
+                              child: const Icon(Icons.delete))),
                     ),
                     Expanded(
                       child: Align(
                           alignment: Alignment.centerRight,
                           child: Container(
-                              padding: EdgeInsets.only(right: 10),
-                              child: Icon(Icons.delete))),
+                              padding: const EdgeInsets.only(right: 10),
+                              child: const Icon(Icons.delete))),
                     ),
                   ])),
               onDismissed: (direction) => {},
@@ -66,25 +66,25 @@ class AssignmentsList extends StatelessWidget {
                     children: [
                       Text(label),
                       Container(
-                        padding: EdgeInsets.only(left: 5),
-                        child: Text(id, style: TextStyle(color: Color(0xFF626475)))
+                        padding: const EdgeInsets.only(left: 5),
+                        child: Text(id, style: const TextStyle(color: Color(0xFF626475)))
                       )
                     ]
                   ),
                   subtitle: Row(
                     children: [
                       Container(
-                        padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
-                        color: Color(0xFFDAF2E3),
-                        child: Text(status.toUpperCase(), style: TextStyle(color: Color(0xFF006624)))
+                        padding: const EdgeInsets.fromLTRB(5, 5, 5, 5),
+                        color: const Color(0xFFDAF2E3),
+                        child: Text(status.toUpperCase(), style: const TextStyle(color: Color(0xFF006624)))
                       ),
                       Container(
-                        padding: EdgeInsets.only(left: 5),
+                        padding: const EdgeInsets.only(left: 5),
                         child: Text(priority + ' Priority'),
                       )
                     ],
                   ),
-                  trailing: Icon(Icons.arrow_forward)));
+                  trailing: const Icon(Icons.arrow_forward)));
         });
   }
 }

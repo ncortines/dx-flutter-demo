@@ -1,4 +1,4 @@
-// Copyright 2020 Pegasystems Inc. All rights reserved.
+// Copyright 2022 Pegasystems Inc. All rights reserved.
 // Use of this source code is governed by a Apache 2.0 license that can be
 // found in the LICENSE file.
 
@@ -19,25 +19,25 @@ void main() {
       child: MaterialApp(
           title: 'DxFlutter',
           theme: ThemeData(
-            primaryColor: Color(0xFF383838),
-            accentColor: Color(0xFF919191),
-            unselectedWidgetColor: Color(0xFF919191)
+              primaryColor: const Color(0xFF383838),
+              accentColor: const Color(0xFF919191),
+              unselectedWidgetColor: const Color(0xFF919191)
           ),
           navigatorKey: navigator.key,
-          home: StoreConnector<UnmodifiableMapView<String, dynamic>, UnmodifiableMapView<String, dynamic>>(
+          home: StoreConnector<UnmodifiableMapView<String, dynamic>, UnmodifiableMapView<String, dynamic>?>(
               converter: (dxStore) => getCurrentPortal(),
               distinct: true,
               builder: (context, portal) {
                 if (portal != null) {
                   final node = getRootNode(portal);
                   return getWidget(node, context, getUpdatedPathContext('', node),
-                      dxContext: DxContext.currentPortal);
+                      dxContext: DxContext.currentPortal)!;
                 }
-                return SplashLoading();
+                return const SplashLoading();
               }))));
 
   navigator.attachListener();
-  SchedulerBinding.instance.addPostFrameCallback((_) {
-    dxStore.dispatch(FetchPortal('ConstellationPortal'));
+  SchedulerBinding.instance!.addPostFrameCallback((_) {
+    dxStore.dispatch(const FetchPortal('ConstellationPortal'));
   });
 }

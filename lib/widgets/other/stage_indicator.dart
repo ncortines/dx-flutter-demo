@@ -1,4 +1,4 @@
-// Copyright 2020 Pegasystems Inc. All rights reserved.
+// Copyright 2022 Pegasystems Inc. All rights reserved.
 // Use of this source code is governed by a Apache 2.0 license that can be
 // found in the LICENSE file.
 
@@ -12,12 +12,12 @@ class CaseStageIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Color(0xFFE8EAEF),
-      constraints: BoxConstraints(
+      color: const Color(0xFFE8EAEF),
+      constraints: const BoxConstraints(
         minHeight: 70,
         maxHeight: 80
       ),
-      padding: EdgeInsets.all(10),
+      padding: const EdgeInsets.all(10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: stages
@@ -28,11 +28,11 @@ class CaseStageIndicator extends StatelessWidget {
               final Color color = status == 'Active'
                   ? Colors.white
                   : status == 'Past'
-                      ? Color(0xFFDAF2E3)
+                      ? const Color(0xFFDAF2E3)
                       : Colors.grey.shade100;
               final textStyle = status == 'Active'
-                  ? TextStyle(color: Colors.black, fontWeight: FontWeight.bold)
-                  : TextStyle(color: Colors.grey);
+                  ? const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)
+                  : const TextStyle(color: Colors.grey);
 
               return MapEntry(
                   index,
@@ -43,9 +43,9 @@ class CaseStageIndicator extends StatelessWidget {
                           clipper: _StageClipper(
                               index == 0, index == stages.length - 1),
                           child: Container(
-                              padding: EdgeInsets.fromLTRB(15, 12, 12, 10),
+                              padding: const EdgeInsets.fromLTRB(15, 12, 12, 10),
                               alignment: Alignment.centerLeft,
-                              constraints: BoxConstraints(minHeight: 35),
+                              constraints: const BoxConstraints(minHeight: 35),
                               child: Text(stageName, style: textStyle)))));
             })
             .values
