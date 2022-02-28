@@ -190,16 +190,16 @@ UnmodifiableMapView<String, dynamic>? getReferencedNode(
       pathContext);
   switch (type) {
     case 'view':
-      final Map? data = dxStore.state[dxContext.toString()];
-      Map<String, dynamic>? viewData =
-          getDataPropertyRecursive(data!, ['resources', 'views', name!]);
+      final Map? data = dxStore.state[DxContext.currentPortal.toString()];
+      UnmodifiableMapView<String, dynamic>? viewData =
+          getDataPropertyRecursive(data!, ['uiResources', 'resources', 'views', name!]);
       // fallback to Portal views lookup
       if (viewData == null && dxContext == DxContext.currentPage) {
         final data = dxStore.state[DxContext.currentPortal.toString()];
         return getDataPropertyRecursive(data, ['resources', 'views', name])
             .cast<String, dynamic>();
       }
-      return UnmodifiableMapView(viewData!);
+      return viewData!;
   }
   return null;
 }

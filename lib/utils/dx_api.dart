@@ -9,9 +9,9 @@ import 'dart:convert';
 
 import 'dx_interpreter.dart';
 
-const String _username = 'user@constellation.com'; // eg. 'user@constellation'
-const String _password = 'rules'; // eg. 'my_password'
-const String _baseUrl = 'https://sde-cam-87.rpega.com/prweb/app/SpaceTravel/api/application/v2'; // eg. 'https://demo.rpega.com/prweb/app/SpaceTravel/api/application/v2'
+const String _username = 'user@constellation.com'; // eg. 'user@constellation.com'
+const String _password = 'rules'; // eg. 'password'
+const String _baseUrl = 'https://974f-83-142-157-190.ngrok.io/prweb/app/SpaceTravel/api/application/v2'; // eg. 'https://demo.rpega.com/prweb/app/SpaceTravel/api/application/v2'
 
 final _headers = {
   'Accept': 'application/json',

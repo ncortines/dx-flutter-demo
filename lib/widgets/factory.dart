@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:collection';
+import 'package:collection/collection.dart';
 
 import 'package:flutter/material.dart';
 import 'package:dx_flutter_demo/utils/dx_interpreter.dart';
@@ -52,7 +53,7 @@ Widget? skipNode(UnmodifiableMapView<String, dynamic> node, BuildContext context
             getUpdatedPathContext(pathContext, node), dxContext));
   }
   return getWidget(
-      children.first, context, getUpdatedPathContext(pathContext, node),
+      children.firstOrNull, context, getUpdatedPathContext(pathContext, node),
       dxContext: dxContext);
 }
 
@@ -98,20 +99,44 @@ Widget? getWidget(UnmodifiableMapView<String, dynamic>? node,
       return PegaPage(
           title, getChildWidgets(node, context, pathContext, dxContext));
     case 'appshell':
-      final String appName = resolvePropertyValue(
-          getDataPropertyRecursive(node!, ['config', 'appName']),
+      final String portalName = resolvePropertyValue(
+          getDataPropertyRecursive(node!, ['config', 'portalName']),
           dxContext,
           pathContext);
-      final List pages = getListFromDataSource(
-          getDataPropertyRecursive(node, ['config', 'pages']), dxContext);
-      final List caseTypes = getListFromDataSource(
-          getDataPropertyRecursive(node, ['config', 'caseTypes']), dxContext);
+      final String portalLogo = resolvePropertyValue(
+          getDataPropertyRecursive(node!, ['config', 'portalLogo']),
+          dxContext,
+          pathContext);
+      // final List pages = getListFromDataSource(
+      //     resolvePropertyValue(
+      //         getDataPropertyRecursive(node, ['config', 'pages']),
+      //         dxContext,
+      //         pathContext
+      //     ),
+      //     dxContext
+      // );
+      final List pages = resolvePropertyValue(
+          getDataPropertyRecursive(node, ['config', 'pages']),
+          dxContext,
+          pathContext
+      );
+
+      // final List caseTypes = getListFromDataSource(
+      //     getDataPropertyRecursive(node, ['config', 'caseTypes']), dxContext);
+
+      final List caseTypes = resolvePropertyValue(
+          getDataPropertyRecursive(node, ['config', 'caseTypes']),
+          dxContext,
+          pathContext
+      );
+
+
       final List<UnmodifiableMapView<String, dynamic>> children = getChildNodes(node);
       final UnmodifiableMapView<String, dynamic> currentPage = children.first;
       // dx store's current page is set only if not yet initialized
       // subsequent "InitCurrentPage" actions (eg. during hot-reloading) won't take effect
       dxStore.dispatch(InitCurrentPage(currentPage));
-      return AppShell(appName, pages, caseTypes);
+      return AppShell(portalName, pathContext, pages, caseTypes);
     case 'caseview':
       final String label = resolvePropertyValue(
           getDataPropertyRecursive(node!, ['config', 'heading']),
@@ -233,33 +258,33 @@ Widget? getWidget(UnmodifiableMapView<String, dynamic>? node,
     case 'flowcontainer':
       return skipNode(node!, context, pathContext, dxContext);
     case 'view':
-      if (getDataPropertyRecursive(node!, ['config', 'ruleClass']) != null) {
-        // TODO this finished assignment detection logic based on "showList"
-        final String showList = getDataPropertyRecursive(
-            getCurrentPage(), ['data', 'content', 'showList']);
-        if (showList == 'false') {
-          final String actionId = node['name'];
-          final ActionData? actionData = resolveActionData(actionId, dxContext);
-          if (actionData != null) {
-            return AssignmentForm(actionData,
-                getChildWidgets(node, context, pathContext, dxContext));
-          }
-          return skipNode(node, context, pathContext, dxContext);
-        }
-        return Container(
-          padding: const EdgeInsets.fromLTRB(0, 40, 0, 40),
-          child: Column(
-            children: [
-              Text('We are done here!',
-                  style: Theme.of(context).textTheme.headline1),
-              Container(
-                  padding: const EdgeInsets.only(top: 15),
-                  child: Icon(getIconData('pi-check')))
-            ],
-          ),
-        );
-      }
-      return skipNode(node, context, pathContext, dxContext);
+      // if (getDataPropertyRecursive(node!, ['config', 'ruleClass']) != null) {
+      //   // TODO this finished assignment detection logic based on "showList"
+      //   final String showList = getDataPropertyRecursive(
+      //       getCurrentPage(), ['data', 'content', 'showList']);
+      //   if (showList == 'false') {
+      //     final String actionId = node['name'];
+      //     final ActionData? actionData = resolveActionData(actionId, dxContext);
+      //     if (actionData != null) {
+      //       return AssignmentForm(actionData,
+      //           getChildWidgets(node, context, pathContext, dxContext));
+      //     }
+      //     return skipNode(node, context, pathContext, dxContext);
+      //   }
+      //   return Container(
+      //     padding: const EdgeInsets.fromLTRB(0, 40, 0, 40),
+      //     child: Column(
+      //       children: [
+      //         Text('We are done here!',
+      //             style: Theme.of(context).textTheme.headline1),
+      //         Container(
+      //             padding: const EdgeInsets.only(top: 15),
+      //             child: Icon(getIconData('pi-check')))
+      //       ],
+      //     ),
+      //   );
+      // }
+      return skipNode(node!, context, pathContext, dxContext);
     case 'pulse':
     case 'pxautocomplete':
     case 'scalar':

@@ -14,10 +14,11 @@ import 'package:flutter_svg/svg.dart';
 
 class AppShell extends StatelessWidget {
   final String appName;
+  final String pathContext;
   final List pages;
   final List caseTypes;
 
-  const AppShell(this.appName, this.pages, this.caseTypes);
+  const AppShell(this.appName, this.pathContext, this.pages, this.caseTypes);
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +63,7 @@ class AppShell extends StatelessWidget {
             distinct: true,
             builder: (context, node) {
               final root = getRootNode(node);
-              return getWidget(root, context, getUpdatedPathContext('', root))!;
+              return getWidget(root, context, getUpdatedPathContext(pathContext, root))!;
             }),
         drawer: Drawer(
             child: Container(

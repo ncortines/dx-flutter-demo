@@ -29,7 +29,7 @@ void main() {
               distinct: true,
               builder: (context, portal) {
                 if (portal != null) {
-                  final node = getRootNode(portal);
+                  final node = getRootNode(portal['uiResources']);
                   return getWidget(node, context, getUpdatedPathContext('', node),
                       dxContext: DxContext.currentPortal)!;
                 }
